@@ -1,23 +1,22 @@
 <template>
   <v-app>
     <v-main>
-      <HelloWorld/>
+      <v-container
+        fill-height
+      >
+        <AppForm/>
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import AppForm from './components/AppForm.vue';
 
 export default {
   name: 'App',
-
   components: {
-    HelloWorld,
+    AppForm,
   },
-
-  data: () => ({
-    //
-  }),
 };
 </script>
