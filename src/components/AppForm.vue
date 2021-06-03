@@ -3,96 +3,79 @@
     justify="center"
     no-gutters
   >
-    <v-col
-      :cols="12"
-      :sm="8"
-      :md="6"
-      :lg="4"
+    <template
+      v-if="isStatusDetached"
     >
-      <v-card>
-        <v-card-text
-          class="pa-6"
-        >
-          <v-stepper
-            v-show="isStatusDetached || isStatusAttached"
-            :value="status"
-            alt-labels
-            flat
+      <v-col
+        :cols="12"
+        :sm="8"
+        :md="6"
+        :lg="4"
+      >
+        <v-card>
+          <v-card-text
+            class="pa-6"
           >
-            <v-stepper-header>
-              <v-stepper-step
-                step="1"
-              />
-              <v-divider></v-divider>
-              <v-stepper-step
-                step="2"
-              />
-            </v-stepper-header>
-          </v-stepper>
-          <v-form
-            v-model="fulfilled"
-          >
-            <v-row
-              no-gutters
+            <AppStepper
+              value="1"
+            />
+            <v-form
+              v-model="fulfilled"
             >
-              <template
-                v-if="isStatusDetached"
+              <v-text-field
+                v-model="username"
+                :rules="[(v) => !!v]"
+                autocomplete="off"
+                autofocus
+                hide-details
+                label="Username"
+                outlined
+                ref="username"
+                class="mb-6"
+              />
+              <v-text-field
+                v-model="password"
+                :rules="[(v) => !!v]"
+                autocomplete="off"
+                hide-details
+                label="Password"
+                type="password"
+                outlined
+                ref="password"
+                class="mb-6"
+              />
+              <v-text-field
+                v-model="id"
+                :rules="[(v) => !!v]"
+                autocomplete="off"
+                hide-details
+                label="User ID"
+                outlined
+                ref="id"
+                class="mb-6"
+              />
+              <v-text-field
+                v-model="company"
+                :rules="[(v) => !!v]"
+                autocomplete="off"
+                hide-details
+                label="Company"
+                outlined
+                ref="company"
+                class="mb-6"
+              />
+              <v-text-field
+                v-model="email"
+                autocomplete="off"
+                hide-details
+                label="Email"
+                outlined
+                ref="email"
+                class="mb-6"
+              />
+              <v-row
+                no-gutters
               >
-                <v-col
-                  :cols="12"
-                >
-                  <v-text-field
-                    v-model="username"
-                    :rules="[(v) => !!v]"
-                    autocomplete="off"
-                    autofocus
-                    hide-details
-                    label="Username"
-                    outlined
-                    ref="username"
-                    class="mb-6"
-                  />
-                  <v-text-field
-                    v-model="password"
-                    :rules="[(v) => !!v]"
-                    autocomplete="off"
-                    hide-details
-                    label="Password"
-                    type="password"
-                    outlined
-                    ref="password"
-                    class="mb-6"
-                  />
-                  <v-text-field
-                    v-model="id"
-                    :rules="[(v) => !!v]"
-                    autocomplete="off"
-                    hide-details
-                    label="User ID"
-                    outlined
-                    ref="id"
-                    class="mb-6"
-                  />
-                  <v-text-field
-                    v-model="company"
-                    :rules="[(v) => !!v]"
-                    autocomplete="off"
-                    hide-details
-                    label="Company"
-                    outlined
-                    ref="company"
-                    class="mb-6"
-                  />
-                  <v-text-field
-                    v-model="email"
-                    autocomplete="off"
-                    hide-details
-                    label="Email"
-                    outlined
-                    ref="email"
-                    class="mb-6"
-                  />
-                </v-col>
                 <v-col
                   class="text-center"
                 >
@@ -107,25 +90,45 @@
                     Submit
                   </v-btn>
                 </v-col>
-              </template>
-              <template
-                v-if="isStatusAttached"
+              </v-row>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </template>
+    <template
+      v-if="isStatusAttached"
+    >
+      <v-col
+        :cols="12"
+        :sm="8"
+        :md="6"
+        :lg="4"
+      >
+        <v-card>
+          <v-card-text
+            class="pa-6"
+          >
+            <AppStepper
+              value="1"
+            />
+            <v-form
+              v-model="fulfilled"
+            >
+              <v-text-field
+                v-model="token"
+                :rules="[(v) => !!v]"
+                autocomplete="off"
+                autofocus
+                hide-details
+                label="Token"
+                outlined
+                ref="token"
+                class="mb-6"
+              />
+              <v-row
+                no-gutters
               >
-                <v-col
-                  :cols="12"
-                >
-                  <v-text-field
-                    v-model="token"
-                    :rules="[(v) => !!v]"
-                    autocomplete="off"
-                    autofocus
-                    hide-details
-                    label="Token"
-                    outlined
-                    ref="token"
-                    class="mb-6"
-                  />
-                </v-col>
                 <v-col
                   class="text-center"
                 >
@@ -150,68 +153,103 @@
                     Verify
                   </v-btn>
                 </v-col>
-              </template>
-              <template
-                v-if="isStatusVerified"
-              >
-                <v-col
-                  :cols="12"
-                >
-                  <v-card
-                    outlined
-                    class="mb-6"
-                  >
-                    <v-date-picker
-                      v-model="date"
-                      :first-day-of-week="1"
-                      color="primary"
-                      full-width
-                    />
-                  </v-card>
-                </v-col>
-                <v-col
-                  class="text-left"
-                >
-                  <v-btn
-                    color="primary"
-                    outlined
-                    @click="detach()"
-                  >
-                    Detach
-                  </v-btn>
-                </v-col>
-                <v-spacer></v-spacer>
-                <v-col
-                  class="text-right"
-                >
-                  <v-btn
-                    color="primary"
-                    depressed
-                    @click="attach()"
-                  >
-                    Attach
-                  </v-btn>
-                </v-col>
-              </template>
-            </v-row>
-          </v-form>
-        </v-card-text>
-      </v-card>
-      <v-snackbar
-        v-model="alert"
-        :color="message.success ? 'success' : 'error'"
-        text
+              </v-row>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </template>
+    <template
+      v-if="isStatusVerified"
+    >
+      <v-col
+        :cols="12"
       >
-        <span
-          v-text="message.text"
-        />
-      </v-snackbar>
-    </v-col>
+        <v-card>
+          <v-card-text
+            class="pa-6"
+          >
+            <v-row
+              class="mb-6"
+            >
+              <v-col
+                :cols="12"
+                :md="6"
+                :lg="4"
+                class="pb-0"
+              >
+                <v-date-picker
+                  v-model="date"
+                  :first-day-of-week="1"
+                  color="primary"
+                  full-width
+                />
+              </v-col>
+              <v-col
+                :cols="12"
+                :md="6"
+                :lg="4"
+                class="pb-0"
+              >
+                <v-time-picker
+                  color="primary"
+                  format="24hr"
+                  full-width
+                />
+              </v-col>
+              <v-col
+                :cols="12"
+                :md="6"
+                :lg="4"
+                class="pb-0"
+              >
+                <v-card></v-card>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
+            >
+              <v-col
+                class="text-left"
+              >
+                <v-btn
+                  color="primary"
+                  outlined
+                  @click="detach()"
+                >
+                  Detach
+                </v-btn>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-col
+                class="text-right"
+              >
+                <v-btn
+                  color="primary"
+                  depressed
+                  @click="attach()"
+                >
+                  Attach
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </template>
+    <AppAlert
+      v-if="message"
+      :color="message.success ? 'success' : 'error'"
+      :text="message.text"
+      @onClose="setMessage(null)"
+    />
   </v-row>
 </template>
 
 <script>
 import axios from '@/plugins/axios';
+import AppAlert from '@/components/AppAlert.vue';
+import AppStepper from '@/components/AppStepper.vue';
 
 const STATUS_DETACHED = '1';
 const STATUS_ATTACHED = '2';
@@ -219,6 +257,10 @@ const STATUS_VERIFIED = '3';
 
 export default {
   name: 'AppForm',
+  components: {
+    AppAlert,
+    AppStepper,
+  },
   data: () => ({
     status: STATUS_DETACHED,
     fulfilled: false,
@@ -229,8 +271,7 @@ export default {
     email: '',
     token: '',
     date: (new Date()).toISOString().substring(0, 10), // FIXME
-    alert: false,
-    message: '',
+    message: null,
     loading: false,
   }),
   computed: {
@@ -263,16 +304,6 @@ export default {
     payload(value) {
       localStorage.setItem('payload', JSON.stringify(value));
     },
-    alert(value) {
-      if (!value) {
-        this.setMessage('');
-      }
-    },
-    message(value) {
-      if (value) {
-        this.setAlert(true);
-      }
-    },
   },
   created() {
     this.restore();
@@ -304,9 +335,6 @@ export default {
     },
     setToken(token) {
       this.token = token;
-    },
-    setAlert(alert) {
-      this.alert = alert;
     },
     setMessage(message) {
       this.message = message;
@@ -465,6 +493,9 @@ export default {
         border: 1px solid currentColor;
       }
     }
+  }
+  .v-picker {
+    height: 400px;
   }
 }
 </style>
