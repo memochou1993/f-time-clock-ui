@@ -169,14 +169,11 @@
           <v-card-text
             class="pa-6"
           >
-            <v-row
-              class="mb-6"
-            >
+            <v-row>
               <v-col
                 :cols="12"
-                :md="6"
+                :sm="6"
                 :lg="4"
-                class="pb-0"
               >
                 <v-date-picker
                   v-model="date"
@@ -185,13 +182,13 @@
                   :min="minDate"
                   color="primary"
                   full-width
+                  @change="switchTime()"
                 />
               </v-col>
               <v-col
                 :cols="12"
-                :md="6"
+                :sm="6"
                 :lg="4"
-                class="pb-0"
               >
                 <v-time-picker
                   v-model="time"
@@ -199,46 +196,79 @@
                   color="primary"
                   format="24hr"
                   full-width
-                  @change="addEvent"
+                  @change="click('.v-time-picker-title__time .v-picker__title__btn')"
                 />
               </v-col>
               <v-col
                 :cols="12"
-                :md="6"
+                :sm="12"
                 :lg="4"
-                class="pb-0"
               >
                 <v-card
                   outlined
+                  class="mb-6"
                 >
-                  <v-list
-                    flat
-                    class="py-1"
+                  <v-card-text
+                    class="pa-0"
                   >
-                    <template
-                      v-for="(event, i) in events"
+                    <v-list
+                      class="py-0"
                     >
-                      <v-list-item-group
-                        :key="i"
+                      <template
+                        v-for="(action, i) in actions"
                       >
-                        <v-list-item>
-                          <v-list-item-content>
-                            <v-list-item-title v-text="event"></v-list-item-title>
-                          </v-list-item-content>
+                        <v-list-item
+                          :key="i"
+                          class="pl-0"
+                        >
+                          <v-btn
+                            v-if="findEvent(filteredEvents, action.type)"
+                            color="orange"
+                            outlined
+                            class="ma-6"
+                            @click="destroyEvent(findEvent(filteredEvents, action.type))"
+                          >
+                            <span
+                              v-text="action.name"
+                            />
+                          </v-btn>
+                          <v-btn
+                            v-else
+                            color="orange"
+                            class="ma-6"
+                            @click="createEvent(action.type)"
+                          >
+                            <span
+                              v-text="action.name"
+                            />
+                          </v-btn>
+                          <template
+                            v-if="findEvent(filteredEvents, action.type)"
+                          >
+                            <v-list-item-content>
+                              <v-list-item-title
+                                class="text-h6"
+                              >
+                                <span
+                                  v-text="formatDate(findEvent(filteredEvents, action.type).date)"
+                                  :key="i"
+                                  class="title font-weight-light"
+                                />
+                              </v-list-item-title>
+                            </v-list-item-content>
+                          </template>
                         </v-list-item>
                         <v-divider
-                          v-if="i < events.length - 1"
+                          v-if="i < actions.length -1"
                           :key="`divider-${i}`"
                         />
-                      </v-list-item-group>
-                    </template>
-                  </v-list>
+                      </template>
+                    </v-list>
+                  </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
-            <v-row
-              no-gutters
-            >
+            <v-row>
               <v-col
                 class="text-left"
               >
@@ -286,6 +316,12 @@ const STATUS_DETACHED = '1';
 const STATUS_ATTACHED = '2';
 const STATUS_VERIFIED = '3';
 
+const ACTION_IN = 'PUNCH_IN';
+const ACTION_OUT = 'PUNCH_OUT';
+
+const HOUR_PUNCH_IN = '09';
+const HOUR_PUNCH_OUT = '18';
+
 export default {
   name: 'AppForm',
   components: {
@@ -303,7 +339,17 @@ export default {
     token: '',
     date: moment().format('YYYY-MM-DD'),
     time: '09:00',
-    events: [1, 2, 3], // FIXME
+    events: [],
+    actions: [
+      {
+        name: 'IN',
+        type: ACTION_IN,
+      },
+      {
+        name: 'OUT',
+        type: ACTION_OUT,
+      },
+    ],
     message: null,
     loading: false,
   }),
@@ -324,10 +370,14 @@ export default {
         email: this.email,
         id: this.id,
         token: this.token,
+        events: this.events,
       };
     },
+    filteredEvents() {
+      return this.events.filter((e) => moment(e.date).isSame(moment(this.date), 'day'));
+    },
     allowedDates: () => (v) => [1, 2, 3, 4, 5].includes(moment(v).days()),
-    allowedHours: () => [9, 18],
+    allowedHours: () => [Number(HOUR_PUNCH_IN), Number(HOUR_PUNCH_OUT)],
     maxDate: () => moment().add(1, 'months').endOf('week').format('YYYY-MM-DD'),
     minDate: () => moment().format('YYYY-MM-DD'),
   },
@@ -395,6 +445,7 @@ export default {
       this.setEmail(payload?.email || '');
       this.setId(payload?.id || '');
       this.setToken(payload?.token || '');
+      this.setEvents(payload?.events || []);
       this.setStatus(localStorage.getItem('status') || STATUS_DETACHED);
     },
     attach() {
@@ -450,7 +501,7 @@ export default {
         url: '/api/detach',
         data: {
           ...this.payload,
-          password: this.token,
+          password: this.isAttached ? this.token : '',
         },
       })
         .then((res) => {
@@ -459,6 +510,7 @@ export default {
             text: `${res.status} ${res.statusText}`,
           });
           this.setToken('');
+          this.setEvents([]);
           this.setStatus(STATUS_DETACHED);
           this.$nextTick(() => this.$refs.username?.focus());
         })
@@ -523,9 +575,36 @@ export default {
           this.setLoading(false);
         });
     },
-    addEvent(e) {
-      document.querySelector('.v-time-picker-title__time .v-picker__title__btn').click(); // FIXME
-      console.log(e);
+    findEvent(events, action) {
+      return events.find((e) => e.action === action);
+    },
+    createEvent(action) {
+      this.events.push({
+        id: +new Date(),
+        action,
+        date: `${this.date}T${this.time}:00+08:00`,
+      });
+      this.switchTime(ACTION_IN);
+    },
+    destroyEvent(event) {
+      this.events.splice(this.events.findIndex((e) => e.id === event.id), 1);
+    },
+    switchTime(action = ACTION_OUT) {
+      switch (action) {
+        case ACTION_IN:
+          this.setTime(`${HOUR_PUNCH_OUT}:00`);
+          break;
+        case ACTION_OUT:
+        default:
+          this.setTime(`${HOUR_PUNCH_IN}:00`);
+          break;
+      }
+    },
+    formatDate(date) {
+      return moment(date).format('HH:mm');
+    },
+    click(s) {
+      this.$el.querySelector(s).click();
     },
   },
 };
