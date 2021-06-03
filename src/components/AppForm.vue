@@ -14,7 +14,7 @@
           class="pa-6"
         >
           <v-stepper
-            v-show="isDetached || isAttached"
+            v-show="isStatusDetached || isStatusAttached"
             :value="status"
             alt-labels
             flat
@@ -34,9 +34,11 @@
               no-gutters
             >
               <template
-                v-if="isDetached"
+                v-if="isStatusDetached"
               >
-                <v-col>
+                <v-col
+                  :cols="12"
+                >
                   <v-text-field
                     v-model="username"
                     autocomplete="off"
@@ -85,47 +87,6 @@
                     class="mb-6"
                   />
                 </v-col>
-              </template>
-              <template
-                v-if="isAttached"
-              >
-                <v-col>
-                  <v-text-field
-                    v-model="token"
-                    autocomplete="off"
-                    autofocus
-                    hide-details
-                    label="Token"
-                    outlined
-                    ref="token"
-                    class="mb-6"
-                  />
-                </v-col>
-              </template>
-              <template
-                v-if="isVerified"
-              >
-                <v-col>
-                  <v-card
-                    outlined
-                  >
-                    <v-date-picker
-                      v-model="date"
-                      :first-day-of-week="1"
-                      color="primary"
-                      full-width
-                      class="mb-6"
-                    />
-                  </v-card>
-                </v-col>
-              </template>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <template
-                v-if="isDetached"
-              >
                 <v-col
                   class="text-center"
                 >
@@ -141,11 +102,37 @@
                 </v-col>
               </template>
               <template
-                v-if="isAttached"
+                v-if="isStatusAttached"
               >
+                <v-col
+                  :cols="12"
+                >
+                  <v-text-field
+                    v-model="token"
+                    autocomplete="off"
+                    autofocus
+                    hide-details
+                    label="Token"
+                    outlined
+                    ref="token"
+                    class="mb-6"
+                  />
+                </v-col>
                 <v-col
                   class="text-center"
                 >
+                  <v-btn
+                    :disabled="loading"
+                    color="primary"
+                    depressed
+                    outlined
+                    @click="detach()"
+                  >
+                    Reset
+                  </v-btn>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col>
                   <v-btn
                     :disabled="loading"
                     color="primary"
@@ -158,8 +145,23 @@
                 </v-col>
               </template>
               <template
-                v-if="isVerified"
+                v-if="isStatusVerified"
               >
+                <v-col
+                  :cols="12"
+                >
+                  <v-card
+                    outlined
+                    class="mb-6"
+                  >
+                    <v-date-picker
+                      v-model="date"
+                      :first-day-of-week="1"
+                      color="primary"
+                      full-width
+                    />
+                  </v-card>
+                </v-col>
                 <v-col
                   class="text-left"
                 >
@@ -226,21 +228,19 @@ export default {
     loading: false,
   }),
   computed: {
-    isDetached() {
+    isStatusDetached() {
       return this.status === STATUS_DETACHED;
     },
-    isAttached() {
+    isStatusAttached() {
       return this.status === STATUS_ATTACHED;
     },
-    isVerified() {
+    isStatusVerified() {
       return this.status === STATUS_VERIFIED;
     },
     payload() {
       return {
+        username: this.username,
         company: this.company,
-        credentials: {
-          username: this.username,
-        },
         email: this.email,
         id: this.id,
         token: this.token,
@@ -273,13 +273,19 @@ export default {
   },
   methods: {
     setStatus(status) {
-      this.status = status;
-      if (status) {
+      if ([STATUS_DETACHED, STATUS_ATTACHED, STATUS_VERIFIED].includes(status)) {
+        this.status = status;
         localStorage.setItem('status', status);
+        return;
       }
+      this.status = STATUS_DETACHED;
+      localStorage.setItem('status', STATUS_DETACHED);
     },
     setUsername(username) {
       this.username = username;
+    },
+    setPassword(password) {
+      this.password = password;
     },
     setId(id) {
       this.id = id;
@@ -304,20 +310,21 @@ export default {
     },
     restore() {
       const payload = JSON.parse(localStorage.getItem('payload'));
+      this.setUsername(payload?.username || '');
       this.setCompany(payload?.company || '');
-      this.setUsername(payload?.credentials?.username || '');
       this.setEmail(payload?.email || '');
       this.setId(payload?.id || '');
       this.setStatus(localStorage.getItem('status') || STATUS_DETACHED);
     },
     attach() {
       this.setLoading(true);
-      const { payload } = this;
-      payload.credentials.password = this.password;
       axios({
         method: 'post',
         url: '/api/attach',
-        data: payload,
+        data: {
+          ...this.payload,
+          password: this.password,
+        },
       })
         .then((res) => {
           this.setMessage({
@@ -327,25 +334,57 @@ export default {
           this.setStatus(STATUS_ATTACHED);
         })
         .catch((e) => {
-          if (e?.response?.status === 400) {
-            this.setMessage({
-              success: false,
-              text: e.message,
-            });
-          }
-          if (e?.response?.status === 401) {
-            this.setStatus(STATUS_ATTACHED);
-          }
-          if (e?.response?.status === 403) {
-            this.setStatus(STATUS_ATTACHED);
+          this.setMessage({
+            success: false,
+            text: e.message,
+          });
+          this.setStatus(STATUS_ATTACHED);
+          this.$nextTick(() => this.$refs.username?.focus());
+        })
+        .finally(() => {
+          this.setPassword('');
+          this.setLoading(false);
+        });
+    },
+    detach() {
+      this.setLoading(true);
+      axios({
+        method: 'post',
+        url: '/api/detach',
+        data: {
+          ...this.payload,
+          password: this.token,
+        },
+      })
+        .then((res) => {
+          this.setMessage({
+            success: true,
+            text: `${res.status} ${res.statusText}`,
+          });
+          this.setToken('');
+          this.setStatus(STATUS_DETACHED);
+        })
+        .catch((e) => {
+          this.setMessage({
+            success: false,
+            text: e.message,
+          });
+          switch (e?.response?.status) {
+            case 401:
+              this.setStatus(STATUS_ATTACHED);
+              this.$nextTick(() => this.$refs.token?.focus());
+              break;
+            case 404:
+              this.setStatus(STATUS_DETACHED);
+              this.$nextTick(() => this.$refs.username?.focus());
+              break;
+            default:
+              break;
           }
         })
         .finally(() => {
           this.setLoading(false);
         });
-    },
-    detach() {
-      // TODO
     },
     verify() {
       this.setLoading(true);
@@ -367,8 +406,16 @@ export default {
             success: false,
             text: e.message,
           });
-          if (e?.response?.status === 404) {
-            this.setStatus(STATUS_DETACHED);
+          switch (e?.response?.status) {
+            case 401:
+              this.$nextTick(() => this.$refs.token?.focus());
+              break;
+            case 404:
+              this.setStatus(STATUS_DETACHED);
+              this.$nextTick(() => this.$refs.username?.focus());
+              break;
+            default:
+              break;
           }
         })
         .finally(() => {
