@@ -97,7 +97,7 @@
                     type="submit"
                     @click="attach()"
                   >
-                    Attach
+                    Submit
                   </v-btn>
                 </v-col>
               </template>
@@ -332,14 +332,29 @@ export default {
             text: res.statusText,
           });
           this.setStatus(STATUS_ATTACHED);
+          this.$nextTick(() => this.$refs.token?.focus());
         })
         .catch((e) => {
           this.setMessage({
             success: false,
             text: e.message,
           });
-          this.setStatus(STATUS_ATTACHED);
-          this.$nextTick(() => this.$refs.username?.focus());
+          switch (e?.response?.status) {
+            case 400:
+              this.setStatus(STATUS_DETACHED);
+              this.$nextTick(() => this.$refs.username?.focus());
+              break;
+            case 401:
+              this.setStatus(STATUS_ATTACHED);
+              this.$nextTick(() => this.$refs.token?.focus());
+              break;
+            case 403:
+              this.setStatus(STATUS_ATTACHED);
+              this.$nextTick(() => this.$refs.token?.focus());
+              break;
+            default:
+              break;
+          }
         })
         .finally(() => {
           this.setPassword('');
@@ -409,6 +424,7 @@ export default {
           });
           switch (e?.response?.status) {
             case 401:
+              this.setStatus(STATUS_ATTACHED);
               this.$nextTick(() => this.$refs.token?.focus());
               break;
             case 404:
