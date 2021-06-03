@@ -363,6 +363,7 @@ export default {
           });
           this.setToken('');
           this.setStatus(STATUS_DETACHED);
+          this.$nextTick(() => this.$refs.username?.focus());
         })
         .catch((e) => {
           this.setMessage({
