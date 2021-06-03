@@ -178,6 +178,7 @@
                 <v-date-picker
                   v-model="date"
                   :allowed-dates="allowedDates"
+                  :events="eventIcons"
                   :max="maxDate"
                   :min="minDate"
                   color="primary"
@@ -277,7 +278,7 @@
                   outlined
                   @click="detach()"
                 >
-                  Detach
+                  Reset
                 </v-btn>
               </v-col>
               <v-spacer></v-spacer>
@@ -289,7 +290,7 @@
                   depressed
                   @click="attach()"
                 >
-                  Attach
+                  Apply
                 </v-btn>
               </v-col>
             </v-row>
@@ -376,10 +377,25 @@ export default {
     filteredEvents() {
       return this.events.filter((e) => moment(e.date).isSame(moment(this.date), 'day'));
     },
-    allowedDates: () => (v) => [1, 2, 3, 4, 5].includes(moment(v).days()),
-    allowedHours: () => [Number(HOUR_PUNCH_IN), Number(HOUR_PUNCH_OUT)],
-    maxDate: () => moment().add(1, 'months').endOf('week').format('YYYY-MM-DD'),
-    minDate: () => moment().format('YYYY-MM-DD'),
+    allowedDates() {
+      return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
+    },
+    allowedHours() {
+      return [Number(HOUR_PUNCH_IN), Number(HOUR_PUNCH_OUT)];
+    },
+    maxDate() {
+      return moment().add(1, 'months').endOf('week').format('YYYY-MM-DD');
+    },
+    minDate() {
+      return moment().format('YYYY-MM-DD');
+    },
+    eventIcons() {
+      return (date) => {
+        const filter = (action) => this.events.filter((e) => e.action === action).some((e) => moment(e.date).isSame(moment(date), 'day'));
+        const colorize = (bool) => (bool ? 'orange' : '');
+        return [colorize(filter(ACTION_IN)), colorize(filter(ACTION_OUT))];
+      };
+    },
   },
   watch: {
     company(value) {
