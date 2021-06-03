@@ -180,7 +180,9 @@
               >
                 <v-date-picker
                   v-model="date"
-                  :first-day-of-week="1"
+                  :allowed-dates="allowedDates"
+                  :max="maxDate"
+                  :min="minDate"
                   color="primary"
                   full-width
                 />
@@ -192,9 +194,12 @@
                 class="pb-0"
               >
                 <v-time-picker
+                  v-model="time"
+                  :allowed-hours="allowedHours"
                   color="primary"
                   format="24hr"
                   full-width
+                  @change="addEvent"
                 />
               </v-col>
               <v-col
@@ -203,7 +208,32 @@
                 :lg="4"
                 class="pb-0"
               >
-                <v-card></v-card>
+                <v-card
+                  outlined
+                >
+                  <v-list
+                    flat
+                    class="py-1"
+                  >
+                    <template
+                      v-for="(event, i) in events"
+                    >
+                      <v-list-item-group
+                        :key="i"
+                      >
+                        <v-list-item>
+                          <v-list-item-content>
+                            <v-list-item-title v-text="event"></v-list-item-title>
+                          </v-list-item-content>
+                        </v-list-item>
+                        <v-divider
+                          v-if="i < events.length - 1"
+                          :key="`divider-${i}`"
+                        />
+                      </v-list-item-group>
+                    </template>
+                  </v-list>
+                </v-card>
               </v-col>
             </v-row>
             <v-row
@@ -248,6 +278,7 @@
 
 <script>
 import axios from '@/plugins/axios';
+import moment from 'moment';
 import AppAlert from '@/components/AppAlert.vue';
 import AppStepper from '@/components/AppStepper.vue';
 
@@ -270,7 +301,9 @@ export default {
     company: '',
     email: '',
     token: '',
-    date: (new Date()).toISOString().substring(0, 10), // FIXME
+    date: moment().format('YYYY-MM-DD'),
+    time: '09:00',
+    events: [1, 2, 3], // FIXME
     message: null,
     loading: false,
   }),
@@ -293,6 +326,10 @@ export default {
         token: this.token,
       };
     },
+    allowedDates: () => (v) => [1, 2, 3, 4, 5].includes(moment(v).days()),
+    allowedHours: () => [9, 18],
+    maxDate: () => moment().add(1, 'months').endOf('week').format('YYYY-MM-DD'),
+    minDate: () => moment().format('YYYY-MM-DD'),
   },
   watch: {
     company(value) {
@@ -335,6 +372,15 @@ export default {
     },
     setToken(token) {
       this.token = token;
+    },
+    setDate(date) {
+      this.date = date;
+    },
+    setTime(time) {
+      this.time = time;
+    },
+    setEvents(events) {
+      this.events = events;
     },
     setMessage(message) {
       this.message = message;
@@ -477,6 +523,10 @@ export default {
           this.setLoading(false);
         });
     },
+    addEvent(e) {
+      document.querySelector('.v-time-picker-title__time .v-picker__title__btn').click(); // FIXME
+      console.log(e);
+    },
   },
 };
 </script>
@@ -496,6 +546,17 @@ export default {
   }
   .v-picker {
     height: 400px;
+    .v-btn--active:hover::before,
+    .v-btn--active::before {
+      opacity: 0 !important;
+    }
+  }
+  .v-time-picker-clock__item {
+    &:after, &before, span {
+      cursor: pointer;
+    }
+    height: 32px;
+    width: 32px;
   }
 }
 </style>
