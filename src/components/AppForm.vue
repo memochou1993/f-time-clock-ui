@@ -600,7 +600,7 @@ export default {
         action,
         date: `${this.date}T${this.time}:00+08:00`,
       });
-      this.switchTime(ACTION_CLOCK_IN);
+      this.switchTime(action);
     },
     destroyEvent(event) {
       this.events.splice(this.events.findIndex((e) => e.id === event.id), 1);
