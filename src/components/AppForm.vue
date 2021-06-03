@@ -133,7 +133,7 @@
                   class="text-center"
                 >
                   <v-btn
-                    color="grey"
+                    color="grey lighten-1"
                     depressed
                     outlined
                     @click="detach()"
@@ -274,7 +274,7 @@
                 class="text-left"
               >
                 <v-btn
-                  color="grey"
+                  color="grey lighten-1"
                   outlined
                   @click="detach()"
                 >
@@ -317,11 +317,11 @@ const STATUS_DETACHED = '1';
 const STATUS_ATTACHED = '2';
 const STATUS_VERIFIED = '3';
 
-const ACTION_IN = 'PUNCH_IN';
-const ACTION_OUT = 'PUNCH_OUT';
+const ACTION_CLOCK_IN = 'CLOCK_IN';
+const ACTION_CLOCK_OUT = 'CLOCK_OUT';
 
-const HOUR_PUNCH_IN = '09';
-const HOUR_PUNCH_OUT = '18';
+const HOUR_CLOCK_IN = '09';
+const HOUR_CLOCK_OUT = '18';
 
 export default {
   name: 'AppForm',
@@ -344,11 +344,11 @@ export default {
     actions: [
       {
         name: 'IN',
-        type: ACTION_IN,
+        type: ACTION_CLOCK_IN,
       },
       {
         name: 'OUT',
-        type: ACTION_OUT,
+        type: ACTION_CLOCK_OUT,
       },
     ],
     message: null,
@@ -381,7 +381,7 @@ export default {
       return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
     },
     allowedHours() {
-      return [Number(HOUR_PUNCH_IN), Number(HOUR_PUNCH_OUT)];
+      return [Number(HOUR_CLOCK_IN), Number(HOUR_CLOCK_OUT)];
     },
     maxDate() {
       return moment().add(1, 'months').endOf('week').format('YYYY-MM-DD');
@@ -393,7 +393,7 @@ export default {
       return (date) => {
         const filter = (action) => this.events.filter((e) => e.action === action).some((e) => moment(e.date).isSame(moment(date), 'day'));
         const colorize = (bool) => (bool ? 'orange' : '');
-        return [colorize(filter(ACTION_IN)), colorize(filter(ACTION_OUT))];
+        return [colorize(filter(ACTION_CLOCK_IN)), colorize(filter(ACTION_CLOCK_OUT))];
       };
     },
   },
@@ -600,19 +600,19 @@ export default {
         action,
         date: `${this.date}T${this.time}:00+08:00`,
       });
-      this.switchTime(ACTION_IN);
+      this.switchTime(ACTION_CLOCK_IN);
     },
     destroyEvent(event) {
       this.events.splice(this.events.findIndex((e) => e.id === event.id), 1);
     },
-    switchTime(action = ACTION_OUT) {
+    switchTime(action = ACTION_CLOCK_OUT) {
       switch (action) {
-        case ACTION_IN:
-          this.setTime(`${HOUR_PUNCH_OUT}:00`);
+        case ACTION_CLOCK_IN:
+          this.setTime(`${HOUR_CLOCK_OUT}:00`);
           break;
-        case ACTION_OUT:
+        case ACTION_CLOCK_OUT:
         default:
-          this.setTime(`${HOUR_PUNCH_IN}:00`);
+          this.setTime(`${HOUR_CLOCK_IN}:00`);
           break;
       }
     },

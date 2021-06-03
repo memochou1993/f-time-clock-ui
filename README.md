@@ -1,4 +1,4 @@
-# femashr-puncher-ui
+# time-clock-ui
 
 ## Project setup
 ```
