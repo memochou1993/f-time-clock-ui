@@ -110,7 +110,7 @@
             class="pa-6"
           >
             <AppStepper
-              value="1"
+              value="2"
             />
             <v-form
               v-model="fulfilled"
@@ -133,7 +133,7 @@
                   class="text-center"
                 >
                   <v-btn
-                    color="primary"
+                    color="grey"
                     depressed
                     outlined
                     @click="detach()"
@@ -273,7 +273,7 @@
                 class="text-left"
               >
                 <v-btn
-                  color="primary"
+                  color="grey"
                   outlined
                   @click="detach()"
                 >
@@ -624,18 +624,29 @@ export default {
     }
   }
   .v-picker {
-    height: 400px;
+    height: 390px;
     .v-btn--active:hover::before,
     .v-btn--active::before {
       opacity: 0 !important;
     }
   }
   .v-time-picker-clock__item {
-    &:after, &before, span {
+    &:after,
+    &before,
+    span {
       cursor: pointer;
     }
     height: 32px;
     width: 32px;
+  }
+  .v-picker__title {
+    height: 100px;
+  }
+  .v-time-picker-title__time {
+    .v-picker__title__btn,
+    span {
+      font-size: 50px;
+    }
   }
 }
 </style>
