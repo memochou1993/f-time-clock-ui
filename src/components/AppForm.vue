@@ -29,7 +29,9 @@
               />
             </v-stepper-header>
           </v-stepper>
-          <v-form>
+          <v-form
+            v-model="fulfilled"
+          >
             <v-row
               no-gutters
             >
@@ -41,6 +43,7 @@
                 >
                   <v-text-field
                     v-model="username"
+                    :rules="[(v) => !!v]"
                     autocomplete="off"
                     autofocus
                     hide-details
@@ -51,6 +54,7 @@
                   />
                   <v-text-field
                     v-model="password"
+                    :rules="[(v) => !!v]"
                     autocomplete="off"
                     hide-details
                     label="Password"
@@ -61,6 +65,7 @@
                   />
                   <v-text-field
                     v-model="id"
+                    :rules="[(v) => !!v]"
                     autocomplete="off"
                     hide-details
                     label="User ID"
@@ -70,6 +75,7 @@
                   />
                   <v-text-field
                     v-model="company"
+                    :rules="[(v) => !!v]"
                     autocomplete="off"
                     hide-details
                     label="Company"
@@ -91,7 +97,8 @@
                   class="text-center"
                 >
                   <v-btn
-                    :disabled="loading"
+                    :disabled="loading || !fulfilled"
+                    :loading="loading"
                     color="primary"
                     depressed
                     type="submit"
@@ -109,6 +116,7 @@
                 >
                   <v-text-field
                     v-model="token"
+                    :rules="[(v) => !!v]"
                     autocomplete="off"
                     autofocus
                     hide-details
@@ -122,7 +130,6 @@
                   class="text-center"
                 >
                   <v-btn
-                    :disabled="loading"
                     color="primary"
                     depressed
                     outlined
@@ -134,7 +141,7 @@
                 <v-spacer></v-spacer>
                 <v-col>
                   <v-btn
-                    :disabled="loading"
+                    :disabled="loading || !fulfilled"
                     color="primary"
                     depressed
                     type="submit"
@@ -166,7 +173,6 @@
                   class="text-left"
                 >
                   <v-btn
-                    :disabled="loading"
                     color="primary"
                     outlined
                     @click="detach()"
@@ -179,7 +185,6 @@
                   class="text-right"
                 >
                   <v-btn
-                    :disabled="loading"
                     color="primary"
                     depressed
                     @click="attach()"
@@ -216,6 +221,7 @@ export default {
   name: 'AppForm',
   data: () => ({
     status: STATUS_DETACHED,
+    fulfilled: false,
     username: '',
     password: '',
     id: '',
@@ -314,6 +320,7 @@ export default {
       this.setCompany(payload?.company || '');
       this.setEmail(payload?.email || '');
       this.setId(payload?.id || '');
+      this.setToken(payload?.token || '');
       this.setStatus(localStorage.getItem('status') || STATUS_DETACHED);
     },
     attach() {
@@ -329,10 +336,12 @@ export default {
         .then((res) => {
           this.setMessage({
             success: true,
-            text: res.statusText,
+            text: `${res.status} ${res.statusText}`,
           });
-          this.setStatus(STATUS_ATTACHED);
-          this.$nextTick(() => this.$refs.token?.focus());
+          if (this.isStatusDetached) {
+            this.setStatus(STATUS_ATTACHED);
+            this.$nextTick(() => this.$refs.token?.focus());
+          }
         })
         .catch((e) => {
           this.setMessage({
@@ -342,7 +351,6 @@ export default {
           switch (e?.response?.status) {
             case 400:
               this.setStatus(STATUS_DETACHED);
-              this.$nextTick(() => this.$refs.username?.focus());
               break;
             case 401:
               this.setStatus(STATUS_ATTACHED);
@@ -391,6 +399,7 @@ export default {
               this.$nextTick(() => this.$refs.token?.focus());
               break;
             case 404:
+              this.setToken('');
               this.setStatus(STATUS_DETACHED);
               this.$nextTick(() => this.$refs.username?.focus());
               break;
@@ -428,6 +437,7 @@ export default {
               this.$nextTick(() => this.$refs.token?.focus());
               break;
             case 404:
+              this.setToken('');
               this.setStatus(STATUS_DETACHED);
               this.$nextTick(() => this.$refs.username?.focus());
               break;
@@ -442,3 +452,19 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+::v-deep {
+  .theme--dark.v-stepper {
+    background: inherit;
+  }
+  .v-text-field--outlined {
+    &.v-input--is-focused,
+    &.v-input--has-state {
+      fieldset {
+        border: 1px solid currentColor;
+      }
+    }
+  }
+}
+</style>
