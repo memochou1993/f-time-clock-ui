@@ -3,6 +3,15 @@
     justify="center"
     no-gutters
   >
+    <v-col
+      :cols="12"
+    >
+      <div
+        class="text-center text-h5 font-weight-re mb-6 cursor-default"
+      >
+        Time Clock
+      </div>
+    </v-col>
     <template
       v-if="isStatusDetached"
     >
@@ -39,9 +48,9 @@
                 autocomplete="off"
                 hide-details
                 label="Password"
-                type="password"
                 outlined
                 ref="password"
+                type="password"
                 class="mb-6"
               />
               <v-text-field
@@ -124,6 +133,7 @@
                 label="Token"
                 outlined
                 ref="token"
+                type="password"
                 class="mb-6"
               />
               <v-row
@@ -299,6 +309,19 @@
         </v-card>
       </v-col>
     </template>
+    <v-col
+      :cols="12"
+    >
+      <div
+        class="caption text-center grey--text text--disabled mt-6"
+      >
+        <span
+          v-text="`© ${new Date().getFullYear()} Memo Chou`"
+          class="cursor-pointer"
+          @click="explore()"
+        />
+      </div>
+    </v-col>
     <AppAlert
       v-if="message"
       :color="message.success ? 'success' : 'error'"
@@ -528,7 +551,7 @@ export default {
         url: '/api/detach',
         data: {
           ...this.payload,
-          password: this.isAttached ? this.token : '',
+          password: this.token,
         },
       })
         .then((res) => {
@@ -629,16 +652,33 @@ export default {
       return moment(date).format('HH:mm');
     },
     clickHour() {
-      document.querySelector('.v-time-picker-title__time .v-picker__title__btn:first-child').click();
+      const hour = this.$el.querySelector('.v-time-picker-title__time .v-picker__title__btn:first-child');
+      if (hour) {
+        hour.click();
+      }
     },
     clickMinute() {
-      document.querySelector('.v-time-picker-title__time .v-picker__title__btn:last-child').click();
+      const minute = this.$el.querySelector('.v-time-picker-title__time .v-picker__title__btn:last-child');
+      if (minute) {
+        minute.click();
+      }
+    },
+    explore() {
+      window.open('https://github.com/memochou1993/time-clock', '_blank', 'noopener noreferrer');
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.cursor-default {
+  cursor: default;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 ::v-deep {
   .theme--dark.v-stepper {
     background: inherit;
