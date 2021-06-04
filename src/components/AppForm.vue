@@ -183,7 +183,6 @@
                   :min="minDate"
                   color="primary"
                   full-width
-                  @change="switchTime()"
                 />
               </v-col>
               <v-col
@@ -197,7 +196,7 @@
                   color="primary"
                   format="24hr"
                   full-width
-                  @change="click('.v-time-picker-title__time .v-picker__title__btn')"
+                  @change="clickHour()"
                 />
               </v-col>
               <v-col
@@ -224,6 +223,7 @@
                         >
                           <v-btn
                             v-if="findEvent(filteredEvents, action.type)"
+                            :disabled="!isAllowedDate"
                             color="orange"
                             outlined
                             class="ma-6"
@@ -235,6 +235,7 @@
                           </v-btn>
                           <v-btn
                             v-else
+                            :disabled="!isAllowedDate"
                             color="orange"
                             class="ma-6"
                             @click="createEvent(action.type)"
@@ -339,7 +340,7 @@ export default {
     email: '',
     token: '',
     date: moment().format('YYYY-MM-DD'),
-    time: '09:00',
+    time: '',
     events: [],
     actions: [
       {
@@ -377,6 +378,9 @@ export default {
     filteredEvents() {
       return this.events.filter((e) => moment(e.date).isSame(moment(this.date), 'day'));
     },
+    isAllowedDate() {
+      return this.allowedDates(this.date);
+    },
     allowedDates() {
       return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
     },
@@ -384,7 +388,7 @@ export default {
       return [Number(HOUR_CLOCK_IN), Number(HOUR_CLOCK_OUT)];
     },
     maxDate() {
-      return moment().add(1, 'months').endOf('week').format('YYYY-MM-DD');
+      return moment().add(1, 'weeks').endOf('week').format('YYYY-MM-DD');
     },
     minDate() {
       return moment().format('YYYY-MM-DD');
@@ -393,7 +397,10 @@ export default {
       return (date) => {
         const filter = (action) => this.events.filter((e) => e.action === action).some((e) => moment(e.date).isSame(moment(date), 'day'));
         const colorize = (bool) => (bool ? 'orange' : '');
-        return [colorize(filter(ACTION_CLOCK_IN)), colorize(filter(ACTION_CLOCK_OUT))];
+        return [
+          colorize(filter(ACTION_CLOCK_IN)),
+          colorize(filter(ACTION_CLOCK_OUT)),
+        ];
       };
     },
   },
@@ -410,6 +417,10 @@ export default {
   },
   created() {
     this.restore();
+  },
+  mounted() {
+    this.clickMinute();
+    this.setRandomTime(HOUR_CLOCK_IN, 0, 30);
   },
   methods: {
     setStatus(status) {
@@ -600,27 +611,28 @@ export default {
         action,
         date: `${this.date}T${this.time}:00+08:00`,
       });
-      this.switchTime(action);
+      if (action === ACTION_CLOCK_IN) {
+        this.setRandomTime(HOUR_CLOCK_OUT, 30, 60);
+      }
+      if (action === ACTION_CLOCK_OUT) {
+        this.setRandomTime(HOUR_CLOCK_IN, 0, 30);
+      }
     },
     destroyEvent(event) {
       this.events.splice(this.events.findIndex((e) => e.id === event.id), 1);
     },
-    switchTime(action = ACTION_CLOCK_OUT) {
-      switch (action) {
-        case ACTION_CLOCK_IN:
-          this.setTime(`${HOUR_CLOCK_OUT}:00`);
-          break;
-        case ACTION_CLOCK_OUT:
-        default:
-          this.setTime(`${HOUR_CLOCK_IN}:00`);
-          break;
-      }
+    setRandomTime(hour, minMinute, maxMinute) {
+      const random = (min, max) => Math.floor(Math.random() * (max - min) + min);
+      this.setTime(moment(`${hour}:${random(minMinute, maxMinute)}`, 'HH:mm').format('HH:mm'));
     },
     formatDate(date) {
       return moment(date).format('HH:mm');
     },
-    click(s) {
-      this.$el.querySelector(s).click();
+    clickHour() {
+      document.querySelector('.v-time-picker-title__time .v-picker__title__btn:first-child').click();
+    },
+    clickMinute() {
+      document.querySelector('.v-time-picker-title__time .v-picker__title__btn:last-child').click();
     },
   },
 };
