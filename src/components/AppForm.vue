@@ -74,7 +74,9 @@
                 class="mb-6"
               />
               <v-text-field
+                v-show="false"
                 v-model="email"
+                :rules="[(v) => !!v]"
                 autocomplete="off"
                 hide-details
                 label="Email"
