@@ -40,6 +40,7 @@
                 label="Username"
                 outlined
                 ref="username"
+                spellcheck="false"
                 class="mb-6"
               />
               <v-text-field
@@ -61,6 +62,7 @@
                 label="User ID"
                 outlined
                 ref="id"
+                spellcheck="false"
                 class="mb-6"
               />
               <v-text-field
@@ -71,6 +73,7 @@
                 label="Company"
                 outlined
                 ref="company"
+                spellcheck="false"
                 class="mb-6"
               />
               <v-text-field
