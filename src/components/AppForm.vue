@@ -128,7 +128,6 @@
             >
               <v-text-field
                 v-model="token"
-                :rules="[(v) => !!v]"
                 autocomplete="off"
                 autofocus
                 hide-details
@@ -156,7 +155,7 @@
                 <v-spacer></v-spacer>
                 <v-col>
                   <v-btn
-                    :disabled="loading || !fulfilled"
+                    :disabled="loading || !token"
                     color="primary"
                     depressed
                     type="submit"
@@ -513,7 +512,7 @@ export default {
         .then((res) => {
           this.setMessage({
             success: true,
-            text: `${res.status} ${res.statusText}`,
+            text: `Request succeeded with status code ${res.status}`,
           });
           if (this.isStatusDetached) {
             this.setStatus(STATUS_ATTACHED);
@@ -559,7 +558,7 @@ export default {
         .then((res) => {
           this.setMessage({
             success: true,
-            text: `${res.status} ${res.statusText}`,
+            text: `Request succeeded with status code ${res.status}`,
           });
           this.setToken('');
           this.setEvents([]);
@@ -600,7 +599,7 @@ export default {
         .then((res) => {
           this.setMessage({
             success: true,
-            text: `${res.status} ${res.statusText}`,
+            text: `Request succeeded with status code ${res.status}`,
           });
           this.setStatus(STATUS_VERIFIED);
         })
