@@ -9,7 +9,7 @@ RUN yarn
 
 COPY . .
 
-RUN yarn build --mode docker
+RUN yarn build
 
 # final stage
 FROM nginx:stable-alpine
