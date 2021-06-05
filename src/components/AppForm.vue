@@ -7,7 +7,7 @@
       :cols="12"
     >
       <div
-        class="text-center text-h5 font-weight-re mb-6 cursor-default"
+        class="text-center text-h5 font-weight-re my-6 cursor-default"
       >
         Time Clock
       </div>
@@ -317,7 +317,7 @@
       :cols="12"
     >
       <div
-        class="caption text-center grey--text text--disabled mt-6"
+        class="caption text-center grey--text text--disabled my-6"
       >
         <span
           v-text="`© ${new Date().getFullYear()} Memo Chou`"

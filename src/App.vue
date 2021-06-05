@@ -3,6 +3,7 @@
     <v-main>
       <v-container
         fill-height
+        class="py-0"
       >
         <AppForm/>
       </v-container>
