@@ -348,9 +348,6 @@ const STATUS_VERIFIED = '3';
 const ACTION_CLOCK_IN = 'CLOCK_IN';
 const ACTION_CLOCK_OUT = 'CLOCK_OUT';
 
-const HOUR_CLOCK_IN = '09';
-const HOUR_CLOCK_OUT = '18';
-
 export default {
   name: 'AppForm',
   components: {
@@ -412,7 +409,7 @@ export default {
       return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
     },
     allowedHours() {
-      return [Number(HOUR_CLOCK_IN), Number(HOUR_CLOCK_OUT)];
+      return [8, 9, 10, 17, 18, 19];
     },
     maxDate() {
       return moment().add(1, 'weeks').endOf('week').format('YYYY-MM-DD');
@@ -444,10 +441,6 @@ export default {
   },
   created() {
     this.restore();
-  },
-  mounted() {
-    this.clickMinute();
-    this.setRandomTime(HOUR_CLOCK_IN, 0, 30);
   },
   methods: {
     setStatus(status) {
@@ -509,6 +502,7 @@ export default {
         url: '/api/attach',
         data: {
           ...this.payload,
+          events: this.events.filter((e) => moment(e.date).isAfter(this.minDate)),
           password: this.password,
         },
       })
@@ -638,19 +632,10 @@ export default {
         action,
         date: `${this.date}T${this.time}:00+08:00`,
       });
-      if (action === ACTION_CLOCK_IN) {
-        this.setRandomTime(HOUR_CLOCK_OUT, 30, 60);
-      }
-      if (action === ACTION_CLOCK_OUT) {
-        this.setRandomTime(HOUR_CLOCK_IN, 0, 30);
-      }
+      this.setTime('');
     },
     destroyEvent(event) {
       this.events.splice(this.events.findIndex((e) => e.id === event.id), 1);
-    },
-    setRandomTime(hour, minMinute, maxMinute) {
-      const random = (min, max) => Math.floor(Math.random() * (max - min) + min);
-      this.setTime(moment(`${hour}:${random(minMinute, maxMinute)}`, 'HH:mm').format('HH:mm'));
     },
     formatDate(date) {
       return moment(date).format('HH:mm');
