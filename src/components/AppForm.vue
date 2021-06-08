@@ -627,6 +627,9 @@ export default {
       return events.find((e) => e.action === action);
     },
     createEvent(action) {
+      if (!this.date || !this.time) {
+        return;
+      }
       this.events.push({
         id: +new Date(),
         action,
