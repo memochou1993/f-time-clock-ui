@@ -391,12 +391,12 @@ export default {
     },
     payload() {
       return {
-        username: this.username,
-        company: this.company,
-        email: this.email,
+        username: this.username.toLowerCase(),
+        company: this.company.toLowerCase(),
+        email: this.email.toLowerCase(),
         id: this.id,
         token: this.token,
-        events: this.events,
+        events: this.events.filter((e) => moment(e.date).isAfter(this.minDate)),
       };
     },
     filteredEvents() {
@@ -502,7 +502,6 @@ export default {
         url: '/api/attach',
         data: {
           ...this.payload,
-          events: this.events.filter((e) => moment(e.date).isAfter(this.minDate)),
           password: this.password,
         },
       })
