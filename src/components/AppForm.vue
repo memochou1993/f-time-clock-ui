@@ -412,7 +412,7 @@ export default {
       return [8, 9, 10, 17, 18, 19];
     },
     maxDate() {
-      return moment().add(1, 'weeks').endOf('week').format('YYYY-MM-DD');
+      return moment().endOf('week').format('YYYY-MM-DD');
     },
     minDate() {
       return moment().format('YYYY-MM-DD');
