@@ -396,7 +396,7 @@ export default {
         email: this.email.toLowerCase(),
         id: this.id,
         token: this.token,
-        events: this.events.filter((e) => moment(e.date).isAfter(this.minDate)),
+        events: this.events.filter((e) => moment(e.date).isAfter(moment())),
       };
     },
     filteredEvents() {
