@@ -3,13 +3,13 @@ FROM node:10 as builder
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package*.json ./
 
-RUN yarn
+RUN npm ci
 
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
 # final stage
 FROM nginx:stable-alpine
