@@ -197,6 +197,7 @@
                   :min="minDate"
                   color="primary"
                   full-width
+                  @change="clickDate"
                 />
               </v-col>
               <v-col
@@ -210,7 +211,7 @@
                   color="primary"
                   format="24hr"
                   full-width
-                  @change="clickHour()"
+                  @change="clickHour"
                 />
               </v-col>
               <v-col
@@ -642,6 +643,22 @@ export default {
     formatDate(date) {
       return moment(date).format('HH:mm');
     },
+    clickDate(date) {
+      const { length } = this.events.filter((e) => moment(e.date).isSame(moment(date), 'day'));
+      if (length > 0) {
+        return;
+      }
+      this.events.push({
+        id: +new Date(),
+        action: ACTION_CLOCK_IN,
+        date: `${date}T09:${String(this.getRandomNum(0, 30)).padStart(2, '0')}+08:00`,
+      });
+      this.events.push({
+        id: +new Date() + 1,
+        action: ACTION_CLOCK_OUT,
+        date: `${date}T18:${this.getRandomNum(31, 60)}+08:00`,
+      });
+    },
     clickHour() {
       const hour = this.$el.querySelector('.v-time-picker-title__time .v-picker__title__btn:first-child');
       if (hour) {
@@ -653,6 +670,9 @@ export default {
       if (minute) {
         minute.click();
       }
+    },
+    getRandomNum(min, max) {
+      return Math.floor(Math.random() * (max - min) + min);
     },
     explore() {
       window.open('https://github.com/memochou1993/time-clock', '_blank', 'noopener noreferrer');
