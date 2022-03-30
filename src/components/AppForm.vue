@@ -651,12 +651,12 @@ export default {
       this.events.push({
         id: +new Date(),
         action: ACTION_CLOCK_IN,
-        date: `${date}T09:${String(this.getRandomNum(0, 30)).padStart(2, '0')}+08:00`,
+        date: `${date}T09:${String(this.getRandomNum(0, 30)).padStart(2, '0')}:00+08:00`,
       });
       this.events.push({
         id: +new Date() + 1,
         action: ACTION_CLOCK_OUT,
-        date: `${date}T18:${this.getRandomNum(31, 60)}+08:00`,
+        date: `${date}T18:${this.getRandomNum(31, 60)}:00+08:00`,
       });
     },
     clickHour() {
