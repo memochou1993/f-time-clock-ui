@@ -207,7 +207,6 @@
               >
                 <v-time-picker
                   v-model="time"
-                  :allowed-hours="allowedHours"
                   color="primary"
                   format="24hr"
                   full-width
@@ -408,9 +407,6 @@ export default {
     },
     allowedDates() {
       return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
-    },
-    allowedHours() {
-      return [8, 9, 10, 17, 18, 19];
     },
     maxDate() {
       return moment().add(8, 'weeks').endOf('week').format('YYYY-MM-DD');
