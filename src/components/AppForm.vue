@@ -409,7 +409,7 @@ export default {
       return (v) => [1, 2, 3, 4, 5].includes(moment(v).days());
     },
     maxDate() {
-      return moment().add(8, 'weeks').endOf('week').format('YYYY-MM-DD');
+      return moment().add(1, 'year').endOf('month').format('YYYY-MM-DD');
     },
     minDate() {
       return moment().format('YYYY-MM-DD');
